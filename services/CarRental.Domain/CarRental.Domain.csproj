@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    THE DOMAIN LAYER: the heart of the system.
+    Rule: this project has ZERO package references and ZERO project references.
+    It must not know about EF Core, MediatR, ASP.NET, MongoDB or anything else that can change.
+    Everything else depends on it; it depends on nothing (the Dependency Rule of Clean Architecture).
+  -->
+  <PropertyGroup>
+    <RootNamespace>CarRental.Domain</RootNamespace>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+</Project>

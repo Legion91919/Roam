@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <!--
+    THE COMPOSITION ROOT: the only project that references every other layer. It wires
+    Application + Infrastructure together through DI and exposes the use cases over HTTP.
+    Controllers are thin: HTTP in, MediatR request out, HTTP result back. No business logic here.
+  -->
+  <PropertyGroup>
+    <RootNamespace>CarRental.Api</RootNamespace>
+    <UserSecretsId>carrental-cleanarchitecture-api</UserSecretsId>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore" />
+    <!-- Needed only by the `dotnet ef` CLI to create migrations; never shipped. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CarRental.Application\CarRental.Application.csproj" />
+    <ProjectReference Include="..\CarRental.Infrastructure\CarRental.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

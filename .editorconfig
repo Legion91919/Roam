@@ -1,0 +1,33 @@
+root = true
+
+[*]
+indent_style = space
+indent_size = 4
+end_of_line = lf
+insert_final_newline = true
+charset = utf-8
+trim_trailing_whitespace = true
+
+[*.{json,yml,yaml,csproj,props,targets,ts,tsx,js,css,html,md}]
+indent_size = 2
+
+[*.cs]
+csharp_style_namespace_declarations = file_scoped:warning
+csharp_prefer_primary_constructors = true:suggestion
+dotnet_style_qualification_for_field = false:suggestion
+
+# Analyzer noise we consciously accept (documented, not hidden):
+# CA1725: MediatR names the parameter "request"; "command"/"query" reads better in CQRS handlers.
+dotnet_diagnostic.CA1725.severity = none
+# CA1848: LoggerMessage source generators are a perf optimisation; plain structured logging is clearer for a PoC.
+dotnet_diagnostic.CA1848.severity = suggestion
+# CA1716: "from"/"to" parameter names are clear in C#; VB interop is not a goal.
+dotnet_diagnostic.CA1716.severity = none
+# CA1707: test method names use underscores so they read as sentences.
+dotnet_diagnostic.CA1707.severity = none
+# CA1861: constant arrays in tests are fine.
+dotnet_diagnostic.CA1861.severity = none
+# CA1515: public types in an app (not a library) are fine.
+dotnet_diagnostic.CA1515.severity = none
+# CA2007: no ConfigureAwait(false) needed in ASP.NET Core (no SynchronizationContext).
+dotnet_diagnostic.CA2007.severity = none

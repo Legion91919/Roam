@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    THE APPLICATION LAYER: the use cases ("create a reservation", "return a vehicle").
+    Depends on: Domain only (plus small, stable abstractions: MediatR, FluentValidation, logging).
+    Knows NOTHING about SQL Server, MongoDB, HTTP or EF Core. It declares PORTS (interfaces such as
+    IReservationRepository) that Infrastructure implements: Dependency Inversion across layers.
+  -->
+  <PropertyGroup>
+    <RootNamespace>CarRental.Application</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="MediatR" />
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CarRental.Domain\CarRental.Domain.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="CarRental.Application.Tests" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { -webkit-font-smoothing: antialiased; }
+  body { @apply bg-surface text-on-surface font-sans text-body-md; margin: 0; }
+  .tabular { font-variant-numeric: tabular-nums; }
+}
+
+@layer components {
+  .icon {
+    font-family: 'Material Symbols Outlined';
+    font-weight: normal;
+    font-style: normal;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+  }
+  .eyebrow { @apply font-mono text-label-sm uppercase tracking-[0.12em] text-primary; }
+  .input {
+    @apply h-11 w-full rounded-card border border-line-strong bg-white px-3.5 text-body-lg text-ink outline-none transition
+           focus:border-primary-container focus:ring-1 focus:ring-primary-container;
+  }
+  .input-error { @apply border-danger bg-danger-surface focus:border-danger focus:ring-danger; }
+}
+
+/* ---- Print: "Print / Save as PDF" of an inspection report produces a clean A4 page ---- */
+@media print {
+  @page { size: A4; margin: 14mm; }
+  body { background: #fff; }
+  header, footer, nav, aside, .print\:hidden { display: none !important; }
+  main { padding-top: 0 !important; }
+  .print-area { box-shadow: none !important; border: 0 !important; }
+  img { max-height: 60mm; }
+}

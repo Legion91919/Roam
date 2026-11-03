@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Use-case tests: real handlers + real Domain, with the OUTER world (database, clock) replaced by
+    in-memory FAKES (hand-written, see Fakes/) or MOCKS (NSubstitute, where we only need to verify an
+    interaction). No database, no Docker: still milliseconds per test.
+    This is what Dependency Inversion buys: handlers depend on ports, so tests can plug in anything.
+  -->
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="NSubstitute" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\services\CarRental.Application\CarRental.Application.csproj" />
+  </ItemGroup>
+</Project>

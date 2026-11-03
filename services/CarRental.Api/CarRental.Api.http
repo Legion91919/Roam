@@ -1,0 +1,219 @@
+### Car Rental API: try it from Visual Studio / Rider / VS Code REST Client
+@api = http://localhost:5080
+@jnb = 8a1c9b52-4a8e-4f0e-9a51-0b7c1d2e3f01
+@cpt = 8a1c9b52-4a8e-4f0e-9a51-0b7c1d2e3f02
+
+### Branches (airports and city branches)
+GET {{api}}/api/branches
+
+### Availability (dates must be in the next 120 days)
+GET {{api}}/api/availability?branchId={{jnb}}&pickupAt=2026-12-01T09:00:00%2B02:00&returnAt=2026-12-08T09:00:00%2B02:00
+
+### Current terms (send its version back when booking)
+# @name terms
+GET {{api}}/api/terms/current
+
+### Sign in as the development Gold customer (see appsettings.Development.json)
+# @name login
+POST {{api}}/api/auth/login
+Content-Type: application/json
+
+{ "email": "gold@roam.test", "password": "Demo_Pass_123!" }
+
+@token = {{login.response.body.accessToken}}
+
+### My profile (ID number comes back masked)
+GET {{api}}/api/customers/me
+Authorization: Bearer {{token}}
+
+### Quote: 7-day SUV, one-way JNB -> CPT, GPS (Gold discount comes from the profile)
+POST {{api}}/api/quotes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "category": "Suv",
+  "pickupBranchId": "{{jnb}}",
+  "returnBranchId": "{{cpt}}",
+  "pickupAt": "2026-12-01T09:00:00+02:00",
+  "returnAt": "2026-12-08T09:00:00+02:00",
+  "extras": "Gps"
+}
+
+### Tokenise a test card (mock hosted fields). The card number goes here and nowhere else.
+# @name card
+POST {{api}}/api/payments/tokenize
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "number": "4242 4242 4242 4242", "expiry": "12/34", "cvc": "123" }
+
+### Book it (authorises the quoted total on the card)
+# @name book
+POST {{api}}/api/reservations
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "category": "Suv",
+  "pickupBranchId": "{{jnb}}",
+  "returnBranchId": "{{cpt}}",
+  "pickupAt": "2026-12-01T09:00:00+02:00",
+  "returnAt": "2026-12-08T09:00:00+02:00",
+  "acceptedTermsVersion": "{{terms.response.body.version}}",
+  "extras": "Gps",
+  "paymentToken": "{{card.response.body.token}}"
+}
+
+### Declined card -> 402 payment.declined (reason: card_declined), nothing booked
+POST {{api}}/api/reservations
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "category": "Economy",
+  "pickupBranchId": "{{jnb}}",
+  "returnBranchId": "{{jnb}}",
+  "pickupAt": "2026-12-01T09:00:00+02:00",
+  "returnAt": "2026-12-02T09:00:00+02:00",
+  "acceptedTermsVersion": "{{terms.response.body.version}}",
+  "paymentToken": "tok_decline"
+}
+
+### Without accepting terms -> 422 terms.not_accepted
+POST {{api}}/api/reservations
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "category": "Economy",
+  "pickupBranchId": "{{jnb}}",
+  "returnBranchId": "{{jnb}}",
+  "pickupAt": "2026-12-01T09:00:00+02:00",
+  "returnAt": "2026-12-02T09:00:00+02:00",
+  "acceptedTermsVersion": null,
+  "paymentToken": "tok_visa_approve"
+}
+
+### My bookings
+GET {{api}}/api/reservations/mine
+Authorization: Bearer {{token}}
+
+### Read it back (query side, owner only)
+GET {{api}}/api/reservations/{{book.response.body.reservationId}}
+Authorization: Bearer {{token}}
+
+### Cancel
+POST {{api}}/api/reservations/{{book.response.body.reservationId}}/cancel
+Authorization: Bearer {{token}}
+
+
+### =====================================================================================
+### SIGN-UP WALKTHROUGH: register -> login -> profile -> terms -> card token -> book
+### =====================================================================================
+
+### 1. Register (change the email each run)
+POST {{api}}/api/auth/register
+Content-Type: application/json
+
+{ "email": "new.driver@example.com", "password": "Roam_Test_123!" }
+
+### 2. Log in
+# @name newLogin
+POST {{api}}/api/auth/login
+Content-Type: application/json
+
+{ "email": "new.driver@example.com", "password": "Roam_Test_123!" }
+
+@newToken = {{newLogin.response.body.accessToken}}
+
+### 3. Driver profile: test SA ID 9005105009088 (born 1990-05-10). 0308125800083 = 2003-08-12 (under 25).
+PUT {{api}}/api/customers/me
+Authorization: Bearer {{newToken}}
+Content-Type: application/json
+
+{
+  "firstName": "Lerato",
+  "lastName": "Dlamini",
+  "phoneNumber": "+27 82 111 2222",
+  "documentType": "SouthAfricanId",
+  "documentNumber": "9005105009088",
+  "issuingCountry": null,
+  "dateOfBirth": "1990-05-10",
+  "licenceIssuedOn": "2010-06-01"
+}
+
+### 4. Current terms
+# @name newTerms
+GET {{api}}/api/terms/current
+
+### 5. Tokenise the Mastercard test card
+# @name newCard
+POST {{api}}/api/payments/tokenize
+Authorization: Bearer {{newToken}}
+Content-Type: application/json
+
+{ "number": "5555 5555 5555 4444", "expiry": "12/34", "cvc": "123" }
+
+### 6. Book: 201 with payment.status "Authorized"
+# @name newBooking
+POST {{api}}/api/reservations
+Authorization: Bearer {{newToken}}
+Content-Type: application/json
+
+{
+  "category": "Compact",
+  "pickupBranchId": "{{jnb}}",
+  "returnBranchId": "{{jnb}}",
+  "pickupAt": "2026-12-10T09:00:00+02:00",
+  "returnAt": "2026-12-13T09:00:00+02:00",
+  "acceptedTermsVersion": "{{newTerms.response.body.version}}",
+  "extras": "None",
+  "paymentToken": "{{newCard.response.body.token}}"
+}
+
+### =====================================================================================
+### STAFF (Agent role)
+### =====================================================================================
+
+### Sign in as the development agent
+# @name agentLogin
+POST {{api}}/api/auth/login
+Content-Type: application/json
+
+{ "email": "agent@roam.test", "password": "Demo_Pass_123!" }
+
+@agentToken = {{agentLogin.response.body.accessToken}}
+
+### Who am I? -> roles ["Agent"]
+GET {{api}}/api/account/me
+Authorization: Bearer {{agentToken}}
+
+### Pickups at JNB on a day (SAST)
+GET {{api}}/api/agent/branches/{{jnb}}/pickups?date=2026-12-10
+Authorization: Bearer {{agentToken}}
+
+### Returns due at JNB by the end of a day (late ones have isLate = true)
+GET {{api}}/api/agent/branches/{{jnb}}/returns?date=2026-12-13
+Authorization: Bearer {{agentToken}}
+
+### Find any booking by id (or ROAM-XXXX-XXXX-XXXX-XXXX)
+GET {{api}}/api/agent/reservations/{{newBooking.response.body.reservationId}}
+Authorization: Bearer {{agentToken}}
+
+### Register a walk-in customer: the temporary password comes back ONCE
+POST {{api}}/api/agent/customers
+Authorization: Bearer {{agentToken}}
+Content-Type: application/json
+
+{
+  "email": "walk.in@example.com",
+  "firstName": "Sipho",
+  "lastName": "Mokoena",
+  "phoneNumber": "+27 83 222 3333",
+  "documentType": "Passport",
+  "documentNumber": "A1234567",
+  "issuingCountry": "GBR",
+  "dateOfBirth": "1987-03-14",
+  "licenceIssuedOn": "2007-05-01"
+}

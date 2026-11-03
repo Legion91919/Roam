@@ -1,0 +1,29 @@
+{
+  // Open in GitHub Codespaces (Code -> Codespaces -> Create) to get a full running demo in the browser:
+  // SQL Server + MongoDB in Docker, the .NET API and the React client. See README "Live demo".
+  "name": "CarRental (Clean Architecture)",
+  "build": { "dockerfile": "Dockerfile" },
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": { "version": "20" },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  "hostRequirements": { "cpus": 4, "memory": "8gb" },
+  "forwardPorts": [5173, 5080],
+  "portsAttributes": {
+    "5173": { "label": "React client", "onAutoForward": "openBrowser" },
+    "5080": { "label": "API (Swagger at /swagger)" }
+  },
+  "postCreateCommand": "dotnet restore CarRental.sln && cd client && npm ci",
+  "postStartCommand": "docker compose up -d",
+  // Start the API and the React client automatically, each in its own terminal, every time you open
+  // the codespace. The client only works while the API is running (it proxies /api to port 5080).
+  "postAttachCommand": {
+    "api": "dotnet run --project services/CarRental.Api --launch-profile http",
+    "client": "cd client && npm run dev -- --host"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-dotnettools.csdevkit", "humao.rest-client"]
+    }
+  }
+}

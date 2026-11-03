@@ -1,0 +1,81 @@
+/**
+ * Design tokens exported from the Stitch "Roam" design system (DESIGN.md), unchanged,
+ * so every component pulls colour, type and spacing from ONE source.
+ * @type {import('tailwindcss').Config}
+ */
+export default {
+  content: ['./index.html', './src/**/*.{ts,tsx}'],
+  theme: {
+    extend: {
+      colors: {
+        surface: '#f8f9ff',
+        'surface-dim': '#d2daeb',
+        'surface-bright': '#f8f9ff',
+        'surface-container-lowest': '#ffffff',
+        'surface-container-low': '#eff3ff',
+        'surface-container': '#e6eeff',
+        'surface-container-high': '#e1e8f9',
+        'surface-container-highest': '#dbe3f3',
+        'surface-variant': '#dbe3f3',
+        'on-surface': '#141c28',
+        'on-surface-variant': '#3f4946',
+        'inverse-surface': '#29313d',
+        'inverse-on-surface': '#ebf1ff',
+        outline: '#6f7976',
+        'outline-variant': '#bec9c5',
+        primary: '#005145',
+        'on-primary': '#ffffff',
+        'primary-container': '#0f6b5c',
+        'on-primary-container': '#99e8d5',
+        'primary-fixed': '#a2f2de',
+        'primary-fixed-dim': '#86d5c3',
+        secondary: '#53615f',
+        'secondary-container': '#d7e6e3',
+        'on-secondary-container': '#596765',
+        error: '#ba1a1a',
+        'error-container': '#ffdad6',
+        'on-error-container': '#93000a',
+        // Semantic extras from DESIGN.md (alerts / warnings / borders)
+        danger: '#b42318',
+        'danger-surface': '#fef3f2',
+        warning: '#b54708',
+        'warning-surface': '#fffaeb',
+        'accent-surface': '#e3f2ef',
+        ink: '#1c2430',
+        muted: '#687385',
+        line: '#e2e8f0',
+        'line-strong': '#cbd5e1',
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+      },
+      fontSize: {
+        'headline-xl': ['40px', { lineHeight: '48px', fontWeight: '600' }],
+        'headline-xl-mobile': ['30px', { lineHeight: '38px', fontWeight: '600' }],
+        'headline-lg': ['28px', { lineHeight: '36px', fontWeight: '600' }],
+        'headline-md': ['22px', { lineHeight: '30px', fontWeight: '600' }],
+        'headline-sm': ['18px', { lineHeight: '26px', fontWeight: '600' }],
+        'body-lg': ['16px', { lineHeight: '24px', fontWeight: '400' }],
+        'body-md': ['14px', { lineHeight: '20px', fontWeight: '400' }],
+        'body-sm': ['12px', { lineHeight: '18px', fontWeight: '400' }],
+        'label-md': ['13px', { lineHeight: '18px', fontWeight: '500' }],
+        'label-sm': ['11px', { lineHeight: '16px', fontWeight: '600' }],
+        'mono-code': ['13px', { lineHeight: '18px', fontWeight: '500' }],
+      },
+      spacing: {
+        18: '4.5rem',
+        gutter: '1.5rem',
+        margin: '2rem',
+      },
+      borderRadius: {
+        card: '10px',
+      },
+      boxShadow: {
+        hover: '0 4px 12px -2px rgba(28,36,48,0.04), 0 2px 6px -1px rgba(28,36,48,0.02)',
+        overlay: '0 12px 28px -4px rgba(28,36,48,0.08), 0 4px 8px -2px rgba(28,36,48,0.03)',
+      },
+    },
+  },
+  plugins: [],
+}

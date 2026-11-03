@@ -1,0 +1,100 @@
+# Azure DevOps equivalent of .github/workflows/ci.yml, extended with deployment stages.
+# Build once, test, publish ONE artifact, then promote the same artifact through environments.
+trigger:
+  branches:
+    include: [ main ]
+
+pr:
+  branches:
+    include: [ main ]
+
+variables:
+  buildConfiguration: Release
+  # Secrets (connection strings) come from a variable group linked to Azure Key Vault, never from YAML:
+  # - group: carrental-secrets
+
+stages:
+  - stage: Build
+    displayName: Build and test
+    jobs:
+      - job: Backend
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - task: UseDotNet@2
+            inputs:
+              useGlobalJson: true
+
+          - script: dotnet restore CarRental.sln
+            displayName: Restore
+
+          - script: dotnet build CarRental.sln -c $(buildConfiguration) --no-restore
+            displayName: Build
+
+          - script: >
+              dotnet test CarRental.sln -c $(buildConfiguration) --no-build
+              --logger trx --results-directory $(Agent.TempDirectory)/TestResults
+              --collect:"XPlat Code Coverage"
+            displayName: Test (unit, architecture, integration via Testcontainers)
+
+          - task: PublishTestResults@2
+            condition: always()
+            inputs:
+              testResultsFormat: VSTest
+              testResultsFiles: '$(Agent.TempDirectory)/TestResults/**/*.trx'
+
+          - task: PublishCodeCoverageResults@2
+            condition: always()
+            inputs:
+              summaryFileLocation: '$(Agent.TempDirectory)/TestResults/**/coverage.cobertura.xml'
+
+          - script: dotnet publish services/CarRental.Api/CarRental.Api.csproj -c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/api --no-build
+            displayName: Publish API
+
+          - publish: $(Build.ArtifactStagingDirectory)/api
+            artifact: api
+
+      - job: Client
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '20.x'
+          - script: npm ci && npm run lint && npm run build
+            workingDirectory: client
+            displayName: Build React client
+          - publish: client/dist
+            artifact: client
+
+  - stage: DeployDev
+    displayName: Deploy to Dev
+    dependsOn: Build
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - deployment: Api
+        environment: carrental-dev
+        pool:
+          vmImage: ubuntu-latest
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - script: echo "Deploy $(Pipeline.Workspace)/api to the Dev App Service (AzureWebApp@1), apply EF migration bundle"
+                  displayName: Deploy (placeholder)
+
+  - stage: DeployProd
+    displayName: Deploy to Production
+    dependsOn: DeployDev
+    jobs:
+      - deployment: Api
+        # Approvals and checks are configured on this environment in Azure DevOps: a human gate before prod.
+        environment: carrental-prod
+        pool:
+          vmImage: ubuntu-latest
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - script: echo "Swap staging slot to production after smoke tests"
+                  displayName: Deploy (placeholder)
